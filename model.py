@@ -3,24 +3,23 @@ import os
 
 import numpy as np
 import sklearn
-from keras.layers import (Convolution2D, Cropping2D, Dense,
-                          Dropout, Flatten, Lambda)
+from keras.layers import (Convolution2D, Cropping2D, Dense, Dropout, Flatten,
+                          Lambda)
 from keras.models import Sequential
 from sklearn.model_selection import train_test_split
 
 import cv2
 
-
 DATA_DIR = os.path.join(os.getcwd(), 'data')
 HYPER_PARAM = {
-        'create_mirror_image': True,
-        'steering_correction': 0.2,
-        'batch_size': 128,
-        'test_size': 0.2,
-        'epochs': 3,
-        'loss': 'mse',
-        'optimizer': 'adam',
-    }
+    'batch_size': 128,
+    'create_mirror_image': True,
+    'epochs': 3,
+    'loss': 'mse',
+    'optimizer': 'adam',
+    'steering_correction': 0.2,
+    'test_size': 0.2,
+}
 
 
 def get_samples():
@@ -42,7 +41,8 @@ def create_steering_correction(steering_angle):
 
 def extract_images_and_measurement(line):
     """Extract the images and measures ments from a line in the csv file"""
-    extract_filename = lambda a: os.path.join(DATA_DIR, 'IMG', os.path.split(a)[-1])
+    def extract_filename(a): return os.path.join(
+        DATA_DIR, 'IMG', os.path.split(a)[-1])
 
     center_image = cv2.imread(extract_filename(line[0]))
     left_image = cv2.imread(extract_filename(line[1]))
@@ -62,9 +62,11 @@ def generator(samples, batch_size=32):
             angles = []
             for batch_sample in batch_samples:
                 # Extract all images and steering angle
-                center, left, right, steering_angle = extract_images_and_measurement(batch_sample)
+                center, left, right, steering_angle = extract_images_and_measurement(
+                    batch_sample)
                 # Create corrected steering angles for the left and right images
-                steering_left, steering_right = create_steering_correction(steering_angle)
+                steering_left, steering_right = create_steering_correction(
+                    steering_angle)
 
                 for img in [center, left, right]:
                     images.append(img)
@@ -106,12 +108,15 @@ if __name__ == '__main__':
     extract_images_and_measurement(samples[0])
 
     # Split the dataset into training and validation sets
-    train_samples, validation_samples = train_test_split(samples, test_size=HYPER_PARAM['test_size'])
+    train_samples, validation_samples = train_test_split(
+        samples, test_size=HYPER_PARAM['test_size'])
 
     # Create generators to dynamically load the data during training,
     # this reduces the memory usage needed to train the model
-    train_generator = generator(train_samples, HYPER_PARAM['batch_size'])
-    validation_generator = generator(validation_samples, HYPER_PARAM['batch_size'])
+    train_generator = generator(train_samples,
+                                HYPER_PARAM['batch_size'])
+    validation_generator = generator(validation_samples,
+                                     HYPER_PARAM['batch_size'])
 
     # Calculate the sizes of the validation and training sets
     if HYPER_PARAM['create_mirror_image']:
