@@ -1,2 +1,6 @@
-data/
+data*
+*.jpg
+*.mp4
+*.pyc
+.DS_Store
 .vscode
